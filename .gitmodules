@@ -1,0 +1,3 @@
+[submodule "intro-outro-generator"]
+	path = intro-outro-generator
+	url = git@github.com:realraum/intro-outro-generator.git
