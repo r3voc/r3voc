@@ -2,3 +2,4 @@ output/*.mkv
 output/*.ts
 input/
 .env
+docker-compose.override.yml
