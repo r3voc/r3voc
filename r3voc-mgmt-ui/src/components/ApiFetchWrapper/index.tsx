@@ -1,0 +1,32 @@
+import type { FC } from 'react';
+import { useEffect } from 'react';
+import * as React from 'react';
+
+import { useApiStore } from '@/stores/api-store';
+
+export interface ApiFetchWrapperProps {
+    children: React.ReactNode;
+}
+
+const ApiFetchWrapper: FC<ApiFetchWrapperProps> = ({ children }) => {
+    const user = useApiStore(state => state.user);
+
+    const fetchUser = useApiStore(state => state.fetchUser);
+    const fetchSchedule = useApiStore(state => state.fetchSchedule);
+    const fetchFiles = useApiStore(state => state.fetchFiles);
+
+    useEffect(() => {
+        fetchUser();
+    }, [fetchUser]);
+
+    useEffect(() => {
+        if (user) {
+            fetchSchedule();
+            fetchFiles();
+        }
+    }, [fetchSchedule, user, fetchFiles]);
+
+    return <>{children}</>;
+};
+
+export default ApiFetchWrapper;

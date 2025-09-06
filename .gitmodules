@@ -1,9 +1,6 @@
 [submodule "intro-outro-generator"]
 	path = intro-outro-generator
 	url = ../../realraum/intro-outro-generator.git
-[submodule "r3voc-mgmt-ui"]
-	path = r3voc-mgmt-ui
-	url = ../../realraum/r3voc-mgmt-ui.git
 [submodule "r3voc-mgmt-backend"]
 	path = r3voc-mgmt-backend
 	url = ../../realraum/r3voc-mgmt-backend.git
