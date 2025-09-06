@@ -58,6 +58,8 @@ RUN yarn install --frozen-lockfile
 
 COPY r3voc-mgmt-ui ./
 
+RUN yarn build
+
 # Finally, set up r3voc-mgmt-backend
 
 FROM base AS backend

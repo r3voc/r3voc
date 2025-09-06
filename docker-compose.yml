@@ -3,7 +3,7 @@ services:
     r3voc:
         env_file: .env
         ports:
-          - "127.0.0.1:1337:5173"
+          - "127.0.0.1:1337:4173"
         build:
           context: .
           tags:
