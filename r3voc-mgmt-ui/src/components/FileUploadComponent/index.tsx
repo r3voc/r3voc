@@ -14,9 +14,12 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import axios from 'axios';
+import moment from 'moment';
 
 import { useApiStore } from '@/stores/api-store';
 import { useUiStore } from '@/stores/ui-store';
+
+import { useDebounce } from '@uidotdev/usehooks';
 
 const FileUploadComponent: FC = () => {
     const schedule = useApiStore(state => state.schedule);
@@ -27,6 +30,10 @@ const FileUploadComponent: FC = () => {
     const [uploadError, setUploadError] = useState<string | null>(null);
 
     const [searchTerm, setSearchTerm] = useState<string>('');
+
+    const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+
+    const debouncedTimeRemaining = useDebounce(timeRemaining, 500);
 
     const selectedGuid =
         useUiStore(state => state.selectedTalkImportGuid) || '';
@@ -64,6 +71,8 @@ const FileUploadComponent: FC = () => {
         setBytesUploaded(0);
         setUploadError(null);
 
+        const uploadStartTime = Date.now();
+
         try {
             await axios.post('/api/upload', data, {
                 headers: {
@@ -75,10 +84,26 @@ const FileUploadComponent: FC = () => {
                         console.log(
                             `Upload progress: ${progressEvent.loaded} / ${progressEvent.total}`,
                         );
+                        const elapsedTime =
+                            (Date.now() - uploadStartTime) / 1000; // in seconds
+                        const uploadSpeed = progressEvent.loaded / elapsedTime; // bytes per second
+                        const remainingBytes =
+                            progressEvent.total - progressEvent.loaded;
+                        const estimatedSecondsRemaining = Math.round(
+                            remainingBytes / uploadSpeed,
+                        );
+                        setTimeRemaining(
+                            `${moment
+                                .duration(estimatedSecondsRemaining, 'seconds')
+                                .humanize()} remaining`,
+                        );
                     }
                 },
             });
             setBytesUploaded(file.size);
+            setTimeRemaining('Done!');
+            setUploadError(null);
+            setFileSize(null);
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 setUploadError(
@@ -93,6 +118,7 @@ const FileUploadComponent: FC = () => {
             }
             setFileSize(null);
             setBytesUploaded(0);
+            setTimeRemaining(null);
         }
 
         fetchFiles();
@@ -152,7 +178,11 @@ const FileUploadComponent: FC = () => {
                     value={progress}
                     sx={{ height: 10, borderRadius: 5, marginBottom: 2 }}
                 />
-                {progress}% / 100%
+                {progress}% / 100% (
+                {debouncedTimeRemaining
+                    ? `${debouncedTimeRemaining}`
+                    : 'estimating...'}
+                )
             </Box>
             <Divider sx={{ mb: 2 }} />
             <form onSubmit={handleFormSubmit}>
