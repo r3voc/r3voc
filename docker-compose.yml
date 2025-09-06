@@ -8,3 +8,5 @@ services:
           context: .
           tags:
             - r3voc:latest
+        volumes:
+          - path/to/uploads:/app/r3voc-mgmt-backend/uploads
