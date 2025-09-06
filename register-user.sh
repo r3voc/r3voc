@@ -15,7 +15,7 @@ if [ -z "$1" ] || [ -z "$2" ]; then
 fi
 
 # Register user in the running container by running "yarn start create-user <username> <password>" in /app/r3voc-mgmt-backend
-docker-compose exec -T app yarn start create-user "$1" "$2"
+docker-compose exec r3voc yarn --cwd /app/r3voc-mgmt-backend start create-user "$1" "$2"
 
 echo "User $1 registered successfully"
 exit 0
