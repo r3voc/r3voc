@@ -20,7 +20,7 @@ set -o pipefail
 # start the UI in the foreground
 (
   cd /app/r3voc-mgmt-ui
-  yarn preview
+  yarn preview --host
 ) &
 
 # wait for all background jobs to finish
