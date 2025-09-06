@@ -14,7 +14,7 @@ set -o pipefail
 # start the backend in the background
 (
   cd /app/r3voc-mgmt-backend
-  yarn start
+  HOST=0.0.0.0 yarn start
 ) &
 
 # start the UI in the foreground
