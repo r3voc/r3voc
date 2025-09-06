@@ -90,7 +90,7 @@ COPY --from=backend /app/r3voc-mgmt-backend ./r3voc-mgmt-backend
 COPY scripts ./scripts
 
 # Expose ports for the UI and backend (express and vite)
-EXPOSE 3000 5173
+EXPOSE 3000 4173
 
 # Start both the UI and backend using a simple script
 COPY entrypoint.sh .
