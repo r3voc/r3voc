@@ -190,9 +190,33 @@ const FileUploadComponent: FC = () => {
                     <Box mb={2}>
                         <Autocomplete
                             options={searchedOptions}
-                            getOptionLabel={option =>
-                                `${option.title} (${option.guid})`
-                            }
+                            getOptionLabel={option => {
+                                const talk = schedule?.conference.days
+                                    .flatMap(day =>
+                                        Object.values(day.rooms).flat(),
+                                    )
+                                    .find(e => e.guid === option.guid);
+
+                                if (!talk) {
+                                    return `${option.title} (${option.guid})`;
+                                }
+
+                                const date = talk.date
+                                    ? new Date(talk.date).toLocaleString(
+                                          'de-DE',
+                                          {
+                                              year: 'numeric',
+                                              month: 'numeric',
+                                              day: 'numeric',
+                                              hour: '2-digit',
+                                              minute: '2-digit',
+                                              hour12: false,
+                                          },
+                                      )
+                                    : 'N/A';
+
+                                return `${option.title} (${option.guid} - ${date})`;
+                            }}
                             renderInput={params => (
                                 <TextField
                                     {...params}

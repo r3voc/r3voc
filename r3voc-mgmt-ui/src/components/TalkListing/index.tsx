@@ -66,7 +66,7 @@ const TalkListing: FC = () => {
             />
             {talks?.map(talk => {
                 const date = talk.date
-                    ? new Date(talk.date).toLocaleString('en-US', {
+                    ? new Date(talk.date).toLocaleString('de-DE', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
