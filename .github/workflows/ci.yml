@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-container:
-    name: Build and Push Docker Image
+    name: Build and Push r3voc Docker Image
     runs-on: ubuntu-latest
 
     steps:

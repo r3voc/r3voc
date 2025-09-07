@@ -1,4 +1,4 @@
-name: CI
+name: Base Container CI
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-base-container:
-    name: Build and Push Docker Image
+    name: Build and Push Base Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
