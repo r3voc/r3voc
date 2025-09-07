@@ -4,6 +4,7 @@ WORKDIR /app
 
 RUN pacman -Syu --noconfirm \
     inkscape \
+    imagemagick \
     nodejs \
     yarn \
     archlinux-keyring \
