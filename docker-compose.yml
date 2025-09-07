@@ -1,12 +1,9 @@
 name: r3voc
 services:
     r3voc:
+        image: ghcr.io/realraum/r3voc
         env_file: .env
         ports:
           - "127.0.0.1:1337:4173"
-        build:
-          context: .
-          tags:
-            - r3voc:latest
         volumes:
           - path/to/uploads:/app/r3voc-mgmt-backend/uploads
