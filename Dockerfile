@@ -10,7 +10,9 @@ RUN apt-get update && apt-get install -y software-properties-common && add-apt-r
     ffmpeg \
     imagemagick \
     curl \
-    gnupg
+    gnupg \
+    inkscape
+
 # RUN apk add --no-cache \
 #     python3 \
 #     py3-virtualenv \
