@@ -1,6 +1,5 @@
-import type React from 'react';
 import type { FC } from 'react';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import Alert from '@mui/material/Alert';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -45,6 +44,8 @@ const FileUploadComponent: FC = () => {
         () => Math.round(fileSize ? (bytesUploaded / fileSize) * 100 : 0),
         [bytesUploaded, fileSize],
     );
+
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFormSubmit = async (
         event: React.FormEvent<HTMLFormElement>,
@@ -104,6 +105,10 @@ const FileUploadComponent: FC = () => {
             setTimeRemaining('Done!');
             setUploadError(null);
             setFileSize(null);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 setUploadError(
@@ -240,7 +245,13 @@ const FileUploadComponent: FC = () => {
                             fullWidth
                         />
                     </Box>
-                    <input type="file" accept=".mp4,.mkv" name="file" />
+                    <input
+                        type="file"
+                        accept=".mp4,.mkv"
+                        name="file"
+                        ref={fileInputRef}
+                        required
+                    />
                     <Box mt={2}>
                         <Button
                             type="submit"
