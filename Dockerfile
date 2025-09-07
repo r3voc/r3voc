@@ -27,12 +27,12 @@ RUN ffmpeg -version
 USER root
 WORKDIR /app
 
-# Cleanup pacman cache and aur user
-RUN pacman -Scc --noconfirm && \
-    userdel -r aur
+# # Cleanup pacman cache and aur user
+# RUN pacman -Scc --noconfirm && \
+#     userdel -r aur
 
-# Uninstall base-devel
-RUN pacman -Rns --noconfirm base-devel git
+# # Uninstall base-devel
+# RUN pacman -Rns --noconfirm base-devel git
 
 # Setup chaotic aur
 RUN pacman-key --init && \
