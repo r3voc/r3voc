@@ -123,7 +123,15 @@ const RootLayout: FC = () => {
                             justifyContent: 'space-between',
                         }}
                     >
-                        <Box>r3voc management UI</Box>
+                        <Box>
+                            <a
+                                href="https://github.com/realraum/r3voc"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Typography>r3voc management UI</Typography>
+                            </a>
+                        </Box>
                         <Box>
                             {appInfo?.ciRunId ? (
                                 <a
