@@ -50,7 +50,7 @@ const TalkListing: FC = () => {
     }, [schedule, sortMode]);
 
     return (
-        <Box display="flex" flexDirection="column" gap={1} my={2}>
+        <Box display="flex" flexDirection="column">
             <FormControlLabel
                 control={
                     <Switch
@@ -63,6 +63,10 @@ const TalkListing: FC = () => {
                     />
                 }
                 label={`Sort by date: ${sortMode === 'date-asc' ? 'Ascending' : 'Descending'}`}
+                sx={{
+                    mb: 2,
+                    px: 4,
+                }}
             />
             {talks?.map(talk => {
                 const date = talk.date

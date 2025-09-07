@@ -67,4 +67,10 @@ RUN chmod +x entrypoint.sh
 
 ENV R3VOC_REPO_LOCATION=/app
 
+ARG COMMIT_SHA
+ENV COMMIT_SHA=${COMMIT_SHA}
+
+ARG CI_RUN_ID
+ENV CI_RUN_ID=${CI_RUN_ID}
+
 CMD ["./entrypoint.sh"]

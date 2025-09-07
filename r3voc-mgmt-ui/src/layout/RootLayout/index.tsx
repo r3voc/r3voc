@@ -6,14 +6,33 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { useApiStore } from '@/stores/api-store';
 
+const layout = {
+    headerHeight: 36,
+    footerHeight: 60,
+};
+
+const Footer = styled('footer')(({ theme }) => ({
+    width: '100%',
+    height: layout.footerHeight,
+    borderTop: `1px solid ${theme.palette.divider}`,
+    color: theme.palette.text.secondary,
+    backgroundColor: theme.palette.background.paper,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+}));
+
 const RootLayout: FC = () => {
     const user = useApiStore(state => state.user);
+    const appInfo = useApiStore(state => state.info);
+
     const logout = useApiStore(state => state.logout);
     const refreshSchedule = useApiStore(state => state.refreshSchedule);
 
@@ -27,11 +46,11 @@ const RootLayout: FC = () => {
 
     return (
         <>
-            <AppBar position="static" color="primary" component="header">
+            <AppBar position="sticky" color="primary" component="header">
                 <Container maxWidth="lg">
                     <Box
                         sx={{
-                            height: 36,
+                            height: layout.headerHeight,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
@@ -79,9 +98,52 @@ const RootLayout: FC = () => {
                     </Box>
                 </Container>
             </AppBar>
-            <Container maxWidth="lg" sx={{ mt: 4 }} component="main">
-                <Outlet />
-            </Container>
+            <Box
+                sx={{
+                    overflowY: 'auto',
+                    height: `calc(100vh - ${layout.headerHeight}px - ${layout.footerHeight}px)`,
+                }}
+            >
+                <Container
+                    maxWidth="lg"
+                    sx={{
+                        pt: 4,
+                    }}
+                    component="main"
+                >
+                    <Outlet />
+                </Container>
+            </Box>
+            <Footer>
+                <Container maxWidth="lg">
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Box>r3voc management UI</Box>
+                        <Box>
+                            {appInfo?.ciRunId ? (
+                                <a
+                                    href={`https://github.com/realraum/r3voc/actions/runs/${appInfo.ciRunId}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Build{' '}
+                                    {appInfo.commitSha?.slice(0, 7) || 'N/A'}
+                                </a>
+                            ) : (
+                                <>
+                                    Build{' '}
+                                    {appInfo?.commitSha?.slice(0, 7) || 'N/A'}
+                                </>
+                            )}
+                        </Box>
+                    </Box>
+                </Container>
+            </Footer>
         </>
     );
 };

@@ -11,7 +11,7 @@ import uploadRouter, { uploadDir } from '@/api/file-upload';
 import filesRouter from '@/api/files';
 import talksRouter from '@/api/talks';
 import userRouter, { tokenCookie } from '@/api/user';
-import {getApiKey, setupApiKey} from '@/apikey';
+import { getApiKey, setupApiKey } from '@/apikey';
 import {
     bootstrapDatabase,
     createUser,
@@ -37,6 +37,14 @@ if (!process.env.R3VOC_REPO_LOCATION) {
     throw new Error(
         'R3VOC_REPO_LOCATION is not defined in environment variables',
     );
+}
+
+if (!process.env.COMMIT_SHA) {
+    throw new Error('COMMIT_SHA is not defined in environment variables');
+}
+
+if (!process.env.CI_RUN_ID) {
+    throw new Error('CI_RUN_ID is not defined in environment variables');
 }
 
 const { SECRET_KEY } = process.env;
@@ -146,6 +154,16 @@ authorizedRouter.get('/schedule/refresh', async (req, res) => {
 
 authorizedRouter.get('/schedule', (req, res) => {
     res.json({ success: true, data: getSchedule() });
+});
+
+authorizedRouter.get('/info', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            commitSha: process.env.COMMIT_SHA,
+            ciRunId: process.env.CI_RUN_ID,
+        },
+    });
 });
 
 authorizedRouter.use(uploadRouter);

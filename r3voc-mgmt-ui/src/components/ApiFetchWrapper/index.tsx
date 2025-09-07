@@ -14,6 +14,11 @@ const ApiFetchWrapper: FC<ApiFetchWrapperProps> = ({ children }) => {
     const fetchUser = useApiStore(state => state.fetchUser);
     const fetchSchedule = useApiStore(state => state.fetchSchedule);
     const fetchFiles = useApiStore(state => state.fetchFiles);
+    const fetchInfo = useApiStore(state => state.fetchInfo);
+
+    useEffect(() => {
+        fetchInfo();
+    }, [fetchInfo]);
 
     useEffect(() => {
         fetchUser();

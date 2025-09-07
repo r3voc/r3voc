@@ -93,3 +93,11 @@ export const apiRenderTalk = async (importId: number): Promise<ApiResponse> => {
 
     return response.json();
 };
+
+export const apiGetInfo = async (): Promise<
+    ApiResponse<{ commitSha: string; ciRunId: string }>
+> => {
+    const response = await fetch('/api/info');
+
+    return response.json();
+};

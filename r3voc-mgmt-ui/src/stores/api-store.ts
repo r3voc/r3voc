@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { ApiUploadedFile, ApiUser } from '@/api';
+import {apiGetInfo, type ApiUploadedFile, type ApiUser} from '@/api';
 import {
     apiFetchFiles,
     apiFetchSchedule,
@@ -17,6 +17,7 @@ export interface ApiStoreState {
     hasFetchedUser: boolean;
     schedule: C3VocSchedule['schedule'] | null;
     files: ApiUploadedFile[] | null;
+    info: { commitSha: string; ciRunId: string } | null;
 }
 
 export interface ApiStoreActions {
@@ -27,6 +28,7 @@ export interface ApiStoreActions {
     refreshSchedule: () => ReturnType<typeof apiRefreshSchedule>;
     fetchFiles: () => ReturnType<typeof apiFetchFiles>;
     renderTalk: (importId: number) => ReturnType<typeof apiRenderTalk>;
+    fetchInfo: () => ReturnType<typeof apiGetInfo>;
 }
 
 export type ApiStore = ApiStoreState & ApiStoreActions;
@@ -36,6 +38,7 @@ export const useApiStore = create<ApiStore>(set => ({
     hasFetchedUser: false,
     schedule: null,
     files: null,
+    info: null,
     login: async (username: string, password: string) => {
         const response = await apiLogin(username, password);
 
@@ -97,4 +100,13 @@ export const useApiStore = create<ApiStore>(set => ({
         return response;
     },
     renderTalk: async (importId: number) => apiRenderTalk(importId),
+    fetchInfo: async () => {
+        const response = await apiGetInfo();
+
+        if (response.success) {
+            set({ info: response.data });
+        }
+
+        return response;
+    },
 }));
