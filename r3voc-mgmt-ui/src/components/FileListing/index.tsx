@@ -15,6 +15,7 @@ export interface FileListingProps {
 const FileListing: FC<FileListingProps> = ({ guid }) => {
     const renderTalk = useApiStore(state => state.renderTalk);
     const fetchFiles = useApiStore(state => state.fetchFiles);
+    const apiKey = useApiStore(state => state.user?.apiKey || '');
 
     const file = useApiStore(state =>
         state.files?.find(f => f.importGuid === guid),
@@ -100,7 +101,7 @@ const FileListing: FC<FileListingProps> = ({ guid }) => {
                     Render file now
                 </Button>
                 <a
-                    href={`/api/uploaded-files/${file.importGuid}/final.mkv`}
+                    href={`/api/uploaded-files/${file.importGuid}/final.mkv?apiKey=${apiKey}`}
                     target="_blank"
                     rel="noreferrer"
                     style={{

@@ -3,12 +3,14 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 
 import type { ApiResponse } from '@/api/types';
+import { getApiKey } from '@/apikey';
 import { getUserByUsername } from '@/db';
 
 const userRouter = express.Router();
 
 export interface ApiUser {
     username: string;
+    apiKey: string;
 }
 
 export const tokenCookie = 'r3voc_token';
@@ -53,7 +55,10 @@ userRouter.post(
             maxAge: 24 * 60 * 60 * 1000,
         });
 
-        res.json({ success: true, data: { username: user.username } });
+        res.json({
+            success: true,
+            data: { username: user.username, apiKey: await getApiKey() },
+        });
     },
 );
 
@@ -90,7 +95,10 @@ userRouter.get(
                 return;
             }
 
-            res.json({ success: true, data: { username: decoded.username } });
+            res.json({
+                success: true,
+                data: { username: decoded.username, apiKey: await getApiKey() },
+            });
         } catch {
             res.status(401).json({ success: false, error: 'Invalid token' });
         }

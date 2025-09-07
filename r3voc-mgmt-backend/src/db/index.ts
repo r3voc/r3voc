@@ -30,6 +30,19 @@ export interface DbUploadedFile {
     importId: number;
 }
 
+export interface DbMetaTable {
+    key: string;
+    value: string;
+}
+
+export interface DbMeta {
+    apiKey: string;
+}
+
+export const defaultMeta: DbMeta = {
+    apiKey: '',
+};
+
 const migrations: Record<number, string> = {
     1: `
         CREATE TABLE IF NOT EXISTS users (
@@ -52,6 +65,15 @@ const migrations: Record<number, string> = {
     `,
     4: `
         ALTER TABLE uploaded_files ADD COLUMN renderState TEXT NOT NULL DEFAULT 'none';
+    `,
+    5: `
+        CREATE TABLE IF NOT EXISTS meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+    `,
+    6: `
+        INSERT INTO meta (key, value) VALUES ('apiKey', '');
     `,
 };
 
@@ -363,3 +385,62 @@ export const setRenderState = async ({
         );
     });
 };
+
+export interface Meta extends DbMeta {
+    save: () => Promise<void>;
+}
+
+export const getMeta = async (): Promise<Meta> =>
+    new Promise((resolve, reject) => {
+        db.all<DbMetaTable>('SELECT * FROM meta', (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                const meta: DbMeta = {
+                    ...defaultMeta,
+                };
+                for (const row of rows) {
+                    if (Object.keys(meta).includes(row.key)) {
+                        // @ts-ignore
+                        meta[row.key] = row.value;
+                    }
+                }
+
+                resolve({
+                    ...meta,
+                    save: async function (): Promise<void> {
+                        return new Promise((res, rej) => {
+                            // @ts-ignore
+                            const entries = Object.entries(this).filter(
+                                ([key]) =>
+                                    key !== 'save' &&
+                                    Object.keys(defaultMeta).includes(key),
+                            ) as [keyof DbMeta, string][];
+                            const updateNext = (index: number): void => {
+                                if (index >= entries.length) {
+                                    res();
+                                    return;
+                                }
+                                const [key, value] = entries[index] as [
+                                    keyof DbMeta,
+                                    string,
+                                ];
+                                db.run(
+                                    'REPLACE INTO meta (key, value) VALUES (?, ?)',
+                                    [key, value],
+                                    replaceErr => {
+                                        if (replaceErr) {
+                                            rej(replaceErr);
+                                        } else {
+                                            updateNext(index + 1);
+                                        }
+                                    },
+                                );
+                            };
+                            updateNext(0);
+                        });
+                    } as () => Promise<void>,
+                });
+            }
+        });
+    });

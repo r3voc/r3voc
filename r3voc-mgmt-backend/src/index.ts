@@ -11,6 +11,7 @@ import uploadRouter, { uploadDir } from '@/api/file-upload';
 import filesRouter from '@/api/files';
 import talksRouter from '@/api/talks';
 import userRouter, { tokenCookie } from '@/api/user';
+import {getApiKey, setupApiKey} from '@/apikey';
 import {
     bootstrapDatabase,
     createUser,
@@ -44,6 +45,8 @@ const isCli = process.argv.length > 2;
 
 await bootstrapDatabase({ quiet: isCli });
 
+await setupApiKey();
+
 const app = express();
 
 app.use(morgan('dev'));
@@ -58,14 +61,28 @@ apiRouter.use(express.urlencoded({ extended: true }));
 apiRouter.use('/user', userRouter);
 
 // make /uploads/<uuid>/final.mkv accessible
-apiRouter.get('/uploaded-files/:uuid/final.mkv', (req, res) => {
+apiRouter.get('/uploaded-files/:uuid/final.mkv', async (req, res) => {
     const { uuid } = req.params;
+    const apiKeyFromQuery = req.query.apiKey as string | undefined;
+
+    if (!uuid) {
+        res.sendStatus(400);
+        return;
+    }
+
+    const apiKey = await getApiKey();
+
+    if (apiKeyFromQuery !== apiKey) {
+        res.sendStatus(403);
+        return;
+    }
+
     const filePath = path.join(uploadDir, uuid, 'final.mkv');
     const absPath = path.resolve(filePath);
 
     // make sure the resolved path is within the uploads directory
     if (!absPath.startsWith(path.resolve(uploadDir))) {
-        res.status(400).json({ error: 'Invalid file path' });
+        res.sendStatus(403);
         return;
     }
 

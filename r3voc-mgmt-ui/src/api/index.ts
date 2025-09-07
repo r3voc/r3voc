@@ -16,6 +16,7 @@ export type ApiResponse<TData = any> =
 
 export interface ApiUser {
     username: string;
+    apiKey: string;
 }
 
 export interface ApiUploadedFile {
