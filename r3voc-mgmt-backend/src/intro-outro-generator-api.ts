@@ -102,13 +102,7 @@ export const renderTalkAssets = async ({
         try {
             child_process.execFileSync(
                 venvPython,
-                [
-                    './make.py',
-                    generatorProject,
-                    '--skip',
-                    'intro',
-                    '--imagemagick',
-                ],
+                ['./make.py', generatorProject, '--skip', 'intro'],
                 {
                     cwd: generatorPath,
                     stdio: 'inherit',
