@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import morgan from 'morgan';
 import path from 'node:path';
 
-import uploadRouter from '@/api/file-upload';
+import uploadRouter, { uploadDir } from '@/api/file-upload';
 import filesRouter from '@/api/files';
 import talksRouter from '@/api/talks';
 import userRouter, { tokenCookie } from '@/api/user';
@@ -58,13 +58,13 @@ apiRouter.use(express.urlencoded({ extended: true }));
 apiRouter.use('/user', userRouter);
 
 // make /uploads/<uuid>/final.mkv accessible
-apiRouter.get('/uploads/:uuid/final.mkv', (req, res) => {
+apiRouter.get('/uploaded-files/:uuid/final.mkv', (req, res) => {
     const { uuid } = req.params;
-    const filePath = `uploads/${uuid}/final.mkv`;
+    const filePath = path.join(uploadDir, uuid, 'final.mkv');
     const absPath = path.resolve(filePath);
 
     // make sure the resolved path is within the uploads directory
-    if (!absPath.startsWith(path.resolve('uploads'))) {
+    if (!absPath.startsWith(path.resolve(uploadDir))) {
         res.status(400).json({ error: 'Invalid file path' });
         return;
     }
