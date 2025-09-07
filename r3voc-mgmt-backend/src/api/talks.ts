@@ -1,6 +1,5 @@
 import express from 'express';
-
-import { renderTalk } from '@/intro-outro-generator-api';
+import child_process from 'node:child_process';
 
 const talksRouter = express.Router();
 
@@ -16,7 +15,12 @@ talksRouter.post('/render', async (req, res) => {
     }
 
     try {
-        await renderTalk({ importId });
+        // run "yarn render-talk <importId>" in a separate process to not block the main thread
+        child_process.spawn('yarn', ['render-talk', importId.toString()], {
+            stdio: 'inherit',
+            shell: true,
+        });
+
         res.json({ success: true });
     } catch (error) {
         console.error('Error rendering talk:', error);

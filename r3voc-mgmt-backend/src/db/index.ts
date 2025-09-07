@@ -1,6 +1,6 @@
 import argon2 from 'argon2';
-import sqlite from 'sqlite3';
 import pathlib from 'node:path';
+import sqlite from 'sqlite3';
 
 const path = pathlib.join('uploads', 'db.sqlite');
 
@@ -24,6 +24,8 @@ export interface DbUploadedFile {
     id: number;
     path: string;
     rendered: boolean;
+    isRendering: boolean;
+    renderState: 'intro' | 'outro' | 'concat' | 'none';
     importGuid: string;
     importId: number;
 }
@@ -45,80 +47,97 @@ const migrations: Record<number, string> = {
             importId INTEGER NOT NULL UNIQUE
         );
     `,
+    3: `
+        ALTER TABLE uploaded_files ADD COLUMN isRendering BOOLEAN NOT NULL DEFAULT 0;
+    `,
+    4: `
+        ALTER TABLE uploaded_files ADD COLUMN renderState TEXT NOT NULL DEFAULT 'none';
+    `,
 };
 
-export const bootstrapDatabase = ({ quiet }: { quiet: boolean }): void => {
-    db.serialize(() => {
-        db.run(`
+export const bootstrapDatabase = async ({
+    quiet,
+}: {
+    quiet: boolean;
+}): Promise<void> =>
+    new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.run(`
             CREATE TABLE IF NOT EXISTS migrations (
                 id INTEGER PRIMARY KEY
             );
         `);
 
-        db.get<{ id?: number }>(
-            'SELECT MAX(id) as id FROM migrations',
-            (err, row) => {
-                if (err) {
-                    console.error(
-                        'Error fetching migration version:',
-                        err.message,
-                    );
-                    return;
-                }
-
-                const currentVersion = row?.id || 0;
-                const targetVersion = Math.max(
-                    ...Object.keys(migrations).map(v => Number.parseInt(v, 10)),
-                );
-
-                const applyMigration = (version: number): void => {
-                    if (version > targetVersion) {
-                        if (!quiet) {
-                            console.log('All migrations applied.');
-                        }
+            db.get<{ id?: number }>(
+                'SELECT MAX(id) as id FROM migrations',
+                (err, row) => {
+                    if (err) {
+                        console.error(
+                            'Error fetching migration version:',
+                            err.message,
+                        );
+                        reject(err);
                         return;
                     }
 
-                    const migration = migrations[version];
-                    if (migration) {
-                        db.run(migration, migrationError => {
-                            if (migrationError) {
-                                console.error(
-                                    `Error applying migration ${version}:`,
-                                    migrationError.message,
-                                );
-                            } else {
-                                db.run(
-                                    'INSERT INTO migrations (id) VALUES (?)',
-                                    [version],
-                                    bumpVersionError => {
-                                        if (bumpVersionError) {
-                                            console.error(
-                                                `Error recording migration ${version}:`,
-                                                bumpVersionError.message,
-                                            );
-                                        } else {
-                                            if (!quiet) {
-                                                console.log(
-                                                    `Migration ${version} applied successfully.`,
-                                                );
-                                            }
-                                            applyMigration(version + 1);
-                                        }
-                                    },
-                                );
-                            }
-                        });
-                    } else {
-                        applyMigration(version + 1);
-                    }
-                };
+                    const currentVersion = row?.id || 0;
+                    const targetVersion = Math.max(
+                        ...Object.keys(migrations).map(v =>
+                            Number.parseInt(v, 10),
+                        ),
+                    );
 
-                applyMigration(currentVersion + 1);
-            },
-        );
+                    const applyMigration = (version: number): void => {
+                        if (version > targetVersion) {
+                            if (!quiet) {
+                                console.log('All migrations applied.');
+                            }
+                            resolve();
+                            return;
+                        }
+
+                        const migration = migrations[version];
+                        if (migration) {
+                            db.run(migration, migrationError => {
+                                if (migrationError) {
+                                    console.error(
+                                        `Error applying migration ${version}:`,
+                                        migrationError.message,
+                                    );
+                                    reject(migrationError);
+                                } else {
+                                    db.run(
+                                        'INSERT INTO migrations (id) VALUES (?)',
+                                        [version],
+                                        bumpVersionError => {
+                                            if (bumpVersionError) {
+                                                console.error(
+                                                    `Error recording migration ${version}:`,
+                                                    bumpVersionError.message,
+                                                );
+                                                reject(bumpVersionError);
+                                            } else {
+                                                if (!quiet) {
+                                                    console.log(
+                                                        `Migration ${version} applied successfully.`,
+                                                    );
+                                                }
+                                                applyMigration(version + 1);
+                                            }
+                                        },
+                                    );
+                                }
+                            });
+                        } else {
+                            applyMigration(version + 1);
+                        }
+                    };
+
+                    applyMigration(currentVersion + 1);
+                },
+            );
+        });
     });
-};
 
 export const getUserByUsername = async (
     username: string,
@@ -266,3 +285,66 @@ export const markVideoRendered = async (importId: number): Promise<void> =>
             },
         );
     });
+
+export const setRenderingStatus = async ({
+    importId,
+    isRendering,
+}: {
+    importId: number;
+    isRendering: boolean;
+}): Promise<void> =>
+    new Promise((resolve, reject) => {
+        db.run(
+            'UPDATE uploaded_files SET isRendering = ? WHERE importId = ?',
+            [isRendering ? 1 : 0, importId],
+            err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            },
+        );
+    });
+
+export const resetRenderingStates = async (): Promise<void> =>
+    new Promise((resolve, reject) => {
+        db.run(
+            'UPDATE uploaded_files SET isRendering = 0, renderState = "none" WHERE isRendering = 1',
+            err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            },
+        );
+    });
+
+export const setRenderState = async ({
+    importId,
+    renderState,
+}: {
+    importId: number;
+    renderState: 'intro' | 'outro' | 'concat' | 'none';
+}): Promise<void> => {
+    if (!['intro', 'outro', 'concat', 'none'].includes(renderState)) {
+        throw new Error(
+            "renderState must be one of 'intro', 'outro', 'concat' or 'none'",
+        );
+    }
+
+    return new Promise((resolve, reject) => {
+        db.run(
+            'UPDATE uploaded_files SET renderState = ? WHERE importId = ?',
+            [renderState, importId],
+            err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            },
+        );
+    });
+};

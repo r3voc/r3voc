@@ -62,22 +62,37 @@ const FileListing: FC<FileListingProps> = ({ guid }) => {
                 ),
             })}
         >
-            <Typography variant="h6" gutterBottom>
-                File Details
-            </Typography>
-            <Typography variant="body1">
-                <strong>Filename:</strong> {file.path}
-            </Typography>
-            <Typography variant="body1">
-                <strong>ID:</strong> {file.id}
-            </Typography>
-            <Typography variant="body1">
-                <strong>Rendered:</strong> {file.rendered ? 'Yes' : 'No'}
-            </Typography>
+            <Box mb={2}>
+                <Typography variant="h6" gutterBottom>
+                    File Details
+                </Typography>
+                <Typography variant="body1">
+                    <strong>Filename:</strong> {file.path}
+                </Typography>
+                <Typography variant="body1">
+                    <strong>ID:</strong> {file.id}
+                </Typography>
+                <Typography variant="body1">
+                    <strong>Rendered:</strong> {file.rendered ? 'Yes' : 'No'}
+                </Typography>
+                <Typography variant="body1">
+                    <strong>Is Rendering:</strong>{' '}
+                    {file.isRendering ? 'Yes' : 'No'}
+                </Typography>
+                <Typography variant="body1">
+                    <strong>Render-state:</strong> {file.renderState || 'N/A'}
+                </Typography>
+                <Typography variant="body1">
+                    <strong>Import ID:</strong> {file.importId}
+                </Typography>
+                <Typography variant="body1">
+                    <strong>Import GUID:</strong> {file.importGuid}
+                </Typography>
+            </Box>
             <Box>
                 <Button
                     onClick={performRender}
-                    loading={loading}
+                    loading={loading || file.isRendering}
                     variant="contained"
                     color="success"
                 >

@@ -20,10 +20,23 @@ const ApiFetchWrapper: FC<ApiFetchWrapperProps> = ({ children }) => {
     }, [fetchUser]);
 
     useEffect(() => {
+        const fetchData = async (): Promise<void> => {
+            await fetchSchedule();
+            await fetchFiles();
+        };
+
+        let intervalId: NodeJS.Timeout;
+
         if (user) {
-            fetchSchedule();
-            fetchFiles();
+            fetchData(); // Initial fetch
+            intervalId = setInterval(fetchData, 10 * 1000); // Fetch every 10 seconds
         }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
     }, [fetchSchedule, user, fetchFiles]);
 
     return <>{children}</>;

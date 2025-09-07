@@ -22,6 +22,8 @@ export interface ApiUploadedFile {
     id: number;
     path: string;
     rendered: boolean;
+    isRendering: boolean;
+    renderState: string | null;
     importGuid: string;
     importId: number;
 }

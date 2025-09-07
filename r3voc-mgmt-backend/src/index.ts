@@ -1,4 +1,4 @@
-import commander from 'commander';
+import * as commander from 'commander';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -15,9 +15,11 @@ import {
     bootstrapDatabase,
     createUser,
     deleteUser,
+    getUploadedFileByImportId,
     getUserByUsername,
+    resetRenderingStates,
 } from '@/db';
-import { checkSetup } from '@/intro-outro-generator-api';
+import { checkSetup, renderTalk } from '@/intro-outro-generator-api';
 import { fetchSchedule, getSchedule } from '@/schedule-cache';
 
 import '@/uploads';
@@ -40,7 +42,7 @@ const { SECRET_KEY } = process.env;
 
 const isCli = process.argv.length > 2;
 
-bootstrapDatabase({ quiet: isCli });
+await bootstrapDatabase({ quiet: isCli });
 
 const app = express();
 
@@ -171,6 +173,14 @@ if (isCli) {
             program.args = [username];
         });
 
+    program
+        .command('render-talk <importId>')
+        .description('Render a talk by import ID')
+        .action(importId => {
+            program.opts().renderTalk = true;
+            program.args = [importId];
+        });
+
     program.exitOverride();
 
     try {
@@ -229,6 +239,32 @@ if (isCli) {
                 console.error('Error fetching user:', error.message);
                 process.exit(1);
             });
+    } else if (options.renderTalk) {
+        const [importId] = program.args;
+
+        if (!importId || Number.isNaN(Number(importId))) {
+            console.error(
+                'A valid importId is required to render a talk (must be a number)',
+            );
+            process.exit(1);
+        }
+
+        const importIdNum = Number(importId);
+
+        const file = await getUploadedFileByImportId(importIdNum);
+
+        if (!file) {
+            console.error(
+                `No uploaded file found for import ID ${importIdNum}`,
+            );
+            process.exit(1);
+        }
+
+        await renderTalk({ importId: importIdNum });
+
+        console.log(`Render job for import ID ${importIdNum} completed.`);
+
+        process.exit(0);
     } else {
         program.outputHelp();
         process.exit(1);
@@ -236,7 +272,8 @@ if (isCli) {
 } else {
     // Start the server
     checkSetup()
-        .then(() => {
+        .then(async () => {
+            await resetRenderingStates();
             app.listen(PORT, HOST, async () => {
                 console.log(`Server is running at http://${HOST}:${PORT}`);
                 await fetchSchedule();
