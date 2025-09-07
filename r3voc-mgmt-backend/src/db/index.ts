@@ -286,6 +286,21 @@ export const markVideoRendered = async (importId: number): Promise<void> =>
         );
     });
 
+export const markVideoUnrendered = async (importId: number): Promise<void> =>
+    new Promise((resolve, reject) => {
+        db.run(
+            'UPDATE uploaded_files SET rendered = 0 WHERE importId = ?',
+            [importId],
+            err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            },
+        );
+    });
+
 export const setRenderingStatus = async ({
     importId,
     isRendering,

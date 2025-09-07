@@ -5,7 +5,7 @@ import path from 'node:path';
 import { uploadDir } from '@/api/file-upload';
 import {
     getUploadedFileByImportId,
-    markVideoRendered,
+    markVideoRendered, markVideoUnrendered,
     setRenderingStatus,
     setRenderState,
 } from '@/db';
@@ -157,6 +157,7 @@ export const renderTalk = async ({
         importId,
         isRendering: true,
     });
+    await markVideoUnrendered(importId);
 
     try {
         const repoPath = process.env.R3VOC_REPO_LOCATION;
