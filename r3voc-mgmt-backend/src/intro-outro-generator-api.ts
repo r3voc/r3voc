@@ -229,7 +229,8 @@ export const renderTalk = async ({
             rawVideo.importGuid,
             'final.mkv',
         );
-        fs.renameSync(videoPath, finalPath);
+        fs.copyFileSync(videoPath, finalPath);
+        fs.unlinkSync(videoPath);
 
         console.log(`Rendered talk for import ID ${importId}`);
 
