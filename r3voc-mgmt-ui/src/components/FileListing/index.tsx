@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { useState } from 'react';
 
 import { lighten } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -25,9 +26,9 @@ const FileListing: FC<FileListingProps> = ({ guid }) => {
 
     if (!file) {
         return (
-            <Box>
+            <Alert severity="warning">
                 <Typography>No files found</Typography>
-            </Box>
+            </Alert>
         );
     }
 

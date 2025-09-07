@@ -36,7 +36,7 @@ const theme = createTheme({
         MuiAlert: {
             styleOverrides: {
                 root: {
-                    borderRadius: 4,
+                    borderRadius: 16,
                 },
             },
         },
