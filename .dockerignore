@@ -1,3 +1,8 @@
 input/
 output/
-intro-outro-generator/**/*.ts
+intro-outro-generator/
+!intro-outro-generator/r3talks/**/*
+!intro-outro-generator/*.py
+!intro-outro-generator/requirements.txt
+!intro-outro-generator/hd1080p.compressorsetting
+!intro-outro-generator/.pep8

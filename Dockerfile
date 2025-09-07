@@ -1,37 +1,49 @@
-FROM ubuntu:24.04 AS base
+FROM archlinux:base AS base
 
 WORKDIR /app
 
-# Install everything needed for python3.9 inside virtualenv, ffmpeg, imagemagick, nodejs24, yarn
-RUN apt-get update && apt-get install -y software-properties-common && add-apt-repository ppa:deadsnakes/ppa && apt-get install -y \
-    python3.9 \
-    python3.9-venv \
-    python3-pip \
-    ffmpeg \
-    imagemagick \
-    curl \
-    gnupg \
-    inkscape
+RUN pacman -Syu --noconfirm \
+    inkscape \
+    nodejs \
+    yarn \
+    archlinux-keyring \
+    ffmpeg
 
-# RUN apk add --no-cache \
-#     python3 \
-#     py3-virtualenv \
-#     py3-pip \
-#     ffmpeg \
-#     imagemagick \
-#     curl \
-#     gnupg
+# ffmpeg-headless
+# RUN useradd -m aur && \
+#     echo "aur ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+# 
+# USER aur
+# WORKDIR /home/aur
+# 
+# # Install ffmpeg-headless from normal AUR
+# RUN git clone https://aur.archlinux.org/ffmpeg-headless.git && \
+#     cd ffmpeg-headless && \
+#     makepkg -si --noconfirm --skippgpcheck && \
+#     cd .. && rm -rf ffmpeg-headless
 
-# Install Node.js 24.x and Yarn
-RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
-    apt-get install -y nodejs && \
-    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && apt-get install -y yarn
+RUN ffmpeg -version
 
-# RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
-#     apk add --no-cache nodejs npm && \
-#     npm install --global yarn
+USER root
+WORKDIR /app
+
+# Cleanup pacman cache and aur user
+RUN pacman -Scc --noconfirm && \
+    userdel -r aur
+
+# Uninstall base-devel
+RUN pacman -Rns --noconfirm base-devel git
+
+# Setup chaotic aur
+RUN pacman-key --init && \
+    pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com && \
+    pacman-key --lsign-key 3056513887B78AEB && \
+    pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' && \
+    pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' && \
+    echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" | tee -a /etc/pacman.conf
+
+# Install python 3.9 from chaotic aur
+RUN pacman -Syu --noconfirm python39
 
 # First, set up the intro-outro-generator
 FROM base AS generator
