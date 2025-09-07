@@ -5,7 +5,8 @@ import path from 'node:path';
 import { uploadDir } from '@/api/file-upload';
 import {
     getUploadedFileByImportId,
-    markVideoRendered, markVideoUnrendered,
+    markVideoRendered,
+    markVideoUnrendered,
     setRenderingStatus,
     setRenderState,
 } from '@/db';
