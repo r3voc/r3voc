@@ -92,8 +92,9 @@ const FileListing: FC<FileListingProps> = ({ guid }) => {
             <Box>
                 <Button
                     onClick={performRender}
-                    loading={loading || file.isRendering}
                     variant="contained"
+                    // For some reason, mui is buggy
+                    loading={Boolean(loading || file.isRendering)}
                     color="success"
                 >
                     Render file now
