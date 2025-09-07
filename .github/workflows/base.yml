@@ -2,22 +2,19 @@ name: CI
 
 on:
   push:
+    paths:
+      - 'base.Dockerfile'
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  build-container:
+  build-base-container:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        with:
-          submodules: 'recursive'
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -34,7 +31,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/${{ github.repository }}-base:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          file: ./Dockerfile
+          file: ./base.Dockerfile
