@@ -100,7 +100,7 @@ const FileListing: FC<FileListingProps> = ({ guid }) => {
                     Render file now
                 </Button>
                 <a
-                    href={`/api/uploads/${file.importGuid}/final.mkv`}
+                    href={`/api/uploaded-files/${file.importGuid}/final.mkv`}
                     target="_blank"
                     rel="noreferrer"
                     style={{
