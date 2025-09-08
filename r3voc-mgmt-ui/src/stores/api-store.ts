@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 
-import {apiGetInfo, type ApiUploadedFile, type ApiUser} from '@/api';
+import type { ApiUploadedFile, ApiUser } from '@/api';
 import {
     apiFetchFiles,
     apiFetchSchedule,
     apiFetchUser,
+    apiGetInfo,
     apiLogin,
     apiLogout,
     apiRefreshSchedule,
@@ -17,7 +18,11 @@ export interface ApiStoreState {
     hasFetchedUser: boolean;
     schedule: C3VocSchedule['schedule'] | null;
     files: ApiUploadedFile[] | null;
-    info: { commitSha: string; ciRunId: string } | null;
+    info: {
+        commitSha: string;
+        ciRunId: string;
+        calendarEmbedUrl?: string;
+    } | null;
 }
 
 export interface ApiStoreActions {

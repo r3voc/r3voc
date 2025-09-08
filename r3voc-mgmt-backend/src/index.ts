@@ -162,6 +162,7 @@ authorizedRouter.get('/info', (req, res) => {
         data: {
             commitSha: process.env.COMMIT_SHA,
             ciRunId: process.env.CI_RUN_ID,
+            calendarEmbedUrl: process.env.CALENDAR_EMBED_URL || undefined,
         },
     });
 });

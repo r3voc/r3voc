@@ -8,6 +8,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import ApiFetchWrapper from '@/components/ApiFetchWrapper';
 import RestrictedRoute from '@/components/RestrictedRoute';
 import RootLayout from '@/layout/RootLayout';
+import CalendarPage from '@/pages/CalendarPage';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import theme from '@/theme';
@@ -28,6 +29,10 @@ createRoot(document.querySelector('#root')!).render(
                                 }
                             >
                                 <Route index element={<HomePage />} />
+                                <Route
+                                    path="calendar"
+                                    element={<CalendarPage />}
+                                />
                             </Route>
                             <Route
                                 element={

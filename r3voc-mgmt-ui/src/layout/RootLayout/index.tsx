@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useState } from 'react';
-import { Link, Outlet } from 'react-router';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
 
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -30,6 +30,10 @@ const Footer = styled('footer')(({ theme }) => ({
 }));
 
 const RootLayout: FC = () => {
+    const location = useLocation();
+
+    const isCalendar = location.pathname === '/calendar';
+
     const user = useApiStore(state => state.user);
     const appInfo = useApiStore(state => state.info);
 
@@ -69,6 +73,32 @@ const RootLayout: FC = () => {
                                 >
                                     Refresh schedule.xml from c3voc import tool
                                 </Button>
+                                <NavLink to="/">
+                                    {props => (
+                                        <Button
+                                            color="info"
+                                            variant="contained"
+                                            size="small"
+                                            disabled={props.isActive}
+                                            sx={{ ml: 1 }}
+                                        >
+                                            Home
+                                        </Button>
+                                    )}
+                                </NavLink>
+                                <NavLink to="/calendar">
+                                    {props => (
+                                        <Button
+                                            color="info"
+                                            variant="contained"
+                                            size="small"
+                                            disabled={props.isActive}
+                                            sx={{ ml: 1 }}
+                                        >
+                                            Calendar
+                                        </Button>
+                                    )}
+                                </NavLink>
                             </Box>
                         ) : null}
                         <Box>
@@ -105,7 +135,7 @@ const RootLayout: FC = () => {
                 }}
             >
                 <Container
-                    maxWidth="lg"
+                    maxWidth={isCalendar ? false : 'lg'}
                     sx={{
                         pt: 4,
                     }}
